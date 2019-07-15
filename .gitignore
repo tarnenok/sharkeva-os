@@ -1,1 +1,3 @@
 floppy.img
+boot/kernel.sys
+boot/stage1.bin
