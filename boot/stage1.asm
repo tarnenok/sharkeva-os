@@ -58,7 +58,7 @@ load_fat:
     call    read_sectors
 
     ; read image file into memory (0050:0000)
-    mov     ax, 0x7c40
+    mov     ax, 0x0050
     mov     es, ax                              ; destination for image
     mov     bx, 0x0000                          ; destination for image
     ; mov     bx, 0x0200
@@ -94,7 +94,7 @@ load_image:
             cmp     dx, 0x0FF0                          ; test for end of file
             jb      load_image
 done:
-    jmp 0x7c40:0x0000
+    jmp 0x0050:0x0000
         
 failure:
     mov si, fail
