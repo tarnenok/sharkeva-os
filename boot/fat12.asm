@@ -1,6 +1,6 @@
     bits 16
 
-    bpbOEM          db "My OS   "
+    bpbOEM:          db "My OS   "
     bpbBytesPerSector:      DW 512
     bpbSectorsPerCluster:   DB 1
     bpbReservedSectors:     DW 1
@@ -26,7 +26,6 @@
 ; AX=>Starting sector
 ; ES:BX=>Buffer to read to
 ;************************************************;
-
 read_sectors:
      .main:
           mov     di, 0x0005                          ; five retries for error
@@ -64,7 +63,6 @@ read_sectors:
 ; Convert CHS to LBA
 ; LBA = (cluster - 2) * sectors per cluster
 ;************************************************;
-
 chs_to_lba:
           sub     ax, 0x0002                          ; zero base cluster number
           xor     cx, cx
@@ -82,7 +80,6 @@ chs_to_lba:
 ; absolute track  = logical sector / (sectors per track * number of heads)
 ;
 ;************************************************;
-
 lba_to_chs:
           xor     dx, dx                              ; prepare dx:ax for operation
           div     WORD [bpbSectorsPerTrack]           ; calculate
@@ -97,3 +94,6 @@ lba_to_chs:
 absoluteSector db 0x00
 absoluteHead   db 0x00
 absoluteTrack  db 0x00
+
+datasector  dw 0x0000
+cluster     dw 0x0000

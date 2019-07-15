@@ -6,14 +6,11 @@
     %include 'stdlib16.asm' 
 
 start:
-    call clear_screen
-
     mov si, header
     call print_line_16
 
     cli
     mov ax, 0x7c00
-    ; mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
@@ -133,11 +130,7 @@ failure:
 data:
     fail db 'Failed', 0
     header db 'Welcome from Boot loader of stage 1', 0
-    process db 'In process: loading Boot loader of stage 2 ...', 0
     stage2_name db 'KERNEL  SYS'
-
-    datasector  dw 0x0000
-    cluster     dw 0x0000
 
     times 510 - ($-$$) db 0
     dw 0xAA55

@@ -25,16 +25,3 @@ print_line_16:
         call new_line_16
 
         ret
-
-; disable due to file size requirments of 512 bytes
-clear_screen:
-    ; mov ah, 06h
-    ; xor al, al
-    ; xor bx, bx
-    ; mov bh, 07h
-    ; xor cx, cx
-    ; mov dh, 24
-    ; mov dl, 79
-    ; int 0x10
-
-    ret

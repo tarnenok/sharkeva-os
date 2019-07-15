@@ -2,12 +2,14 @@
     bits 16					; we are still in real mode
 
     jmp main				; jump to main
-    %include 'stdlib16.asm' 
+    %include 'stdlib16full.asm' 
 
 main:
 	cli
 	push cs		; Insure DS=CS
 	pop ds
+
+    call clear_screen
 
 	mov si, message
 	call print_line_16
@@ -16,4 +18,4 @@ main:
 	hlt					; hault the syst
 
 data:
-    message	db	"Welcome from Boot loader of stage 2", 0
+    message	db	"Welcome from Boot loader of stage", 0
