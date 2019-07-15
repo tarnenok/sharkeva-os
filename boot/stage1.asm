@@ -20,28 +20,8 @@ start:
     mov sp, 0xFFFF
     sti
 
-    ; mov si, process
-    ; call print_line_16
-
-load_root:
-    ; compute size of root directory and store in "cx"
-    xor cx, cx
-    xor dx, dx
-    mov ax, 0x0020   ; 32 byte directory entry
-    mul word [bpbRootEntries]    ; total size of directory
-    div word [bpbBytesPerSector] ; sectors used by directory
-    xchg ax, cx
-
-    ; compute location of root directory and store in "ax"
-    mov al, byte [bpbNumberOfFATs]    ; number of FATs
-    mul word [bpbSectorsPerFAT]   ; sectors used by FATs
-    add ax, word [bpbReservedSectors] ; adjust for bootsector
-    mov word [datasector], ax ; base of root directory
-    add word [datasector], cx
-    
-    ; read root directory into memory (7C00:0200)
-    mov bx, 0x0200    ; copy root dir above bootcode
-    call read_sectors
+    mov bx, 0x0200 ; copy root dir above bootcode
+    call load_root ; read root directory into memory (7C00:0200)
 
     ; browse root directory for binary image
     mov cx, word [bpbRootEntries]     ; load loop counter
@@ -114,9 +94,6 @@ load_image:
             cmp     dx, 0x0FF0                          ; test for end of file
             jb      load_image
 done:
-    ; push    WORD 0x0050
-    ; push    WORD 0x0000
-    ; retf
     jmp 0x7c40:0x0000
         
 failure:

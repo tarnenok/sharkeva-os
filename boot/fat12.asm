@@ -1,6 +1,6 @@
     bits 16
 
-    bpbOEM:          db "My OS   "
+    bpbOEM:          db "SHARKEVA"
     bpbBytesPerSector:      DW 512
     bpbSectorsPerCluster:   DB 1
     bpbReservedSectors:     DW 1
@@ -17,7 +17,7 @@
     bsUnused:       DB 0
     bsExtBootSignature:     DB 0x29
     bsSerialNumber:         DD 0xa0a1a2a3
-    bsVolumeLabel:          DB "MOS FLOPPY "
+    bsVolumeLabel:          DB "SHARKEVA OS"
     bsFileSystem:           DB "FAT12   "
 
 ;************************************************;
@@ -90,6 +90,28 @@ lba_to_chs:
           mov     BYTE [absoluteHead], dl
           mov     BYTE [absoluteTrack], al
           ret
+
+;************************************************;
+; Loads FAT root to ES:BX
+;************************************************;
+load_root:
+    xor cx, cx
+    xor dx, dx
+    mov ax, 0x0020   ; 32 byte directory entry
+    mul word [bpbRootEntries]    ; total size of directory
+    div word [bpbBytesPerSector] ; sectors used by directory
+    xchg ax, cx
+
+    ; compute location of root directory and store in "ax"
+    mov al, byte [bpbNumberOfFATs]    ; number of FATs
+    mul word [bpbSectorsPerFAT]   ; sectors used by FATs
+    add ax, word [bpbReservedSectors] ; adjust for bootsector
+    mov word [datasector], ax ; base of root directory
+    add word [datasector], cx
+    
+    call read_sectors
+
+    ret
 
 absoluteSector db 0x00
 absoluteHead   db 0x00

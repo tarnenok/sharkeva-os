@@ -18,4 +18,4 @@ main:
 	hlt					; hault the syst
 
 data:
-    message	db	"Welcome from Boot loader of stage", 0
+    message	db	"Welcome from Boot loader of stage 2", 0
