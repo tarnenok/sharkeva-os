@@ -1,0 +1,9 @@
+romimage:    file="C:/Program Files (x86)/Bochs-2.6.9/BIOS-bochs-latest"
+vgaromimage: file="C:/Program Files (x86)/Bochs-2.6.9/VGABIOS-lgpl-latest"
+ 
+floppya: 1_44="C:\projects\os-example\with-bootloader\floppy.img", status=inserted
+display_library: win32, options=gui_debug
+
+log:         OSDev.log
+error:       action=report 
+info:        action=report
