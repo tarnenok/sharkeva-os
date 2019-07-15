@@ -6,16 +6,17 @@
 
 main:
 	cli
-	push cs		; Insure DS=CS
+	push cs ; Insure DS=CS
 	pop ds
 
     call clear_screen
+    call move_cursor_to_beginig
 
 	mov si, message
 	call print_line_16
 
-	cli					; clear interrupts to prevent triple faults
-	hlt					; hault the syst
+	cli ; clear interrupts to prevent triple faults
+	hlt ; hault the syst
 
 data:
     message	db	"Welcome from Boot loader of stage 2", 0

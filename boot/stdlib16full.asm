@@ -13,3 +13,12 @@ clear_screen:
     int 0x10
 
     ret
+
+move_cursor_to_beginig:
+    mov ah, 2
+    mov bh, 0
+    mov dh, 0
+    mov dl, 0
+    int 0x10
+
+    ret
