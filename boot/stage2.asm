@@ -42,6 +42,8 @@ main:
 
 main_stage_3:
     jmp main_stage3_body
+    
+    %include 'stdlib32.asm'
 
 wait_input:
     in      al, 0x64		; read status register
@@ -83,5 +85,13 @@ enable_A20:
     or      al, 2
     out     0x60, al
 
+    call clear_screen_32
+
+    mov ebx, message_32_mode
+    call print_line_32
+
     cli
 	hlt ; hault the syst
+
+data_32:
+    message_32_mode db "You are in 32 mode!", 0
