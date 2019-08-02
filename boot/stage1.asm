@@ -1,5 +1,17 @@
+; Stage 1 bootloader with restriction in size 512B 
+;
+; 1. Set data segmets to 0x7c00:0x0000
+; 2. Load file stage2 from disk by FAT12 file system to 0x0050:0x0000
+;   - Load root directory
+;   - Load information from root directory by filename
+;   - Load FAT info from file system
+;   - Load file infot by reading cluster info
+; 3. Jump to 0x0050:0x0000
+
     bits 16
     org 0x7c00
+
+    %define ROOT_DIR_OFFSET 0x0200
 
     jmp start
     %include 'fat12.asm'
@@ -20,31 +32,17 @@ start:
     mov sp, 0xFFFF
     sti
 
-    mov bx, 0x0200 ; copy root dir above bootcode
+    mov bx, ROOT_DIR_OFFSET ; copy root dir above bootcode
     call load_root ; read root directory into memory (7C00:0200)
 
     ; browse root directory for binary image
-    mov cx, word [bpbRootEntries]     ; load loop counter
-    mov di, 0x0200        ; locate first root entry
-    .loop:
-        push cx
-        mov cx, 0x000B        ; eleven character name
-        mov si, stage2_name     ; image name to find
-        push di
-        rep cmpsb         ; test for entry match
-        pop di
-        je load_fat
-        pop cx
-        add di, 0x0020        ; queue next directory entry
-        loop .loop
-        jmp failure
+    mov si, stage2_name
+    mov di, ROOT_DIR_OFFSET ; locate first root entry
+    call load_file_info
+    cmp ax, 0
+    jne failure
 
 load_fat:
-    ; save starting cluster of boot image
-
-    mov     dx, word [es:(di + 0x001A)]
-    mov     word [cluster], dx                  ; file's first cluster
-
     ; compute size of FAT and store in "cx"
     xor     ax, ax
     mov     al, byte [bpbNumberOfFATs]          ; number of FATs

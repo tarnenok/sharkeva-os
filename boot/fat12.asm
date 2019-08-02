@@ -113,6 +113,37 @@ load_root:
 
     ret
 
+;************************************************;
+; Load file info from FAT12 into [cluster] variable
+; SI = pointer to file name
+; DI = address where Root directory starts
+; Return -> AX = 0 = success, AX = 1 = error, cluster = first cluster of the file 
+;************************************************;
+load_file_info:
+     mov cx, word [bpbRootEntries]     ; load loop counter
+     .loop:
+          push cx
+          mov cx, 0x000B        ; eleven character name
+          push si
+          push di
+          rep cmpsb         ; test for entry match
+          pop di
+          pop si
+          pop cx
+          je .success
+          add di, 0x0020        ; queue next directory entry
+          loop .loop
+          jmp .failure
+     .success:
+          mov ax, 0
+          mov dx, word [es:(di + 0x001A)]
+          mov word [cluster], dx                  ; file's first cluster
+          jmp .end
+     .failure:
+          mov ax, 1
+     .end:     
+          ret
+
 absoluteSector db 0x00
 absoluteHead   db 0x00
 absoluteTrack  db 0x00

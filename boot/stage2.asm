@@ -1,3 +1,12 @@
+; Stage 2 bootloader for loading kernel binaries
+;
+; 1. Configure code and stack segemts
+; 2. Load the predefined global descriptor table with code, data and null segment
+; 3. Enable Protected mode 
+; 4. Switch to the Protected mode and 32bit instructions by jumpinh there
+; 5. Enable A20 for 4GB memory addresing
+; 6. Load Kernel fyle from FAT12 filesystem
+
     org 0x0500		
     bits 16	
 
