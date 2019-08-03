@@ -12,6 +12,10 @@
     org 0x7c00
 
     %define ROOT_DIR_OFFSET 0x0200
+    %define FAT_INFO_OFFSET 0x0200
+
+    %define STAGE2_SEGMENT_BASE 0x0050
+    %define STAGE2_SEGMENT_OFFSET 0x0000
 
     jmp start
     %include 'fat12.asm'
@@ -33,7 +37,7 @@ start:
     sti
 
     mov bx, ROOT_DIR_OFFSET ; copy root dir above bootcode
-    call load_root ; read root directory into memory (7C00:0200)
+    call load_root ; read root directory into memory
 
     ; browse root directory for binary image
     mov si, stage2_name
@@ -42,57 +46,17 @@ start:
     cmp ax, 0
     jne failure
 
-load_fat:
-    ; compute size of FAT and store in "cx"
-    xor     ax, ax
-    mov     al, byte [bpbNumberOfFATs]          ; number of FATs
-    mul     word [bpbSectorsPerFAT]             ; sectors used by FATs
-    mov     cx, ax
+    mov bx, FAT_INFO_OFFSET
+    call load_fat
 
-    ; compute location of FAT and store in "ax"
-    mov     ax, word [bpbReservedSectors]       ; adjust for bootsector
-    
-    mov     bx, 0x0200                          ; copy FAT above bootcode
-    call    read_sectors
-
-    ; read image file into memory (0050:0000)
-    mov     ax, 0x0050
-    mov     es, ax                              ; destination for image
-    mov     bx, 0x0000                          ; destination for image
-    ; mov     bx, 0x0200
-    push    bx
-
-load_image:
-    mov     ax, word [cluster]                  ; cluster to read
-    pop     bx                                  ; buffer to read into
-    call    chs_to_lba                          ; convert cluster to LBA
-    xor     cx, cx
-    mov     cl, byte [bpbSectorsPerCluster]     ; sectors to read
-    call    read_sectors
-    push    bx
-    
-    ; compute next cluster
-    mov     ax, word [cluster]                  ; identify current cluster
-    mov     cx, ax                              ; copy current cluster
-    mov     dx, ax                              ; copy current cluster
-    shr     dx, 0x0001                          ; divide by two
-    add     cx, dx                              ; sum for (3/2)
-    mov     bx, 0x0200                          ; location of FAT in memory
-    add     bx, cx                              ; index into FAT
-    mov     dx, word [gs:bx]                    ; read two bytes from FAT
-    test    ax, 0x0001
-    jnz .odd_cluster
-        .even_cluster:
-            and     dx, 0000111111111111b               ; take low twelve bits
-            jmp     .done
-        .odd_cluster:
-            shr     dx, 0x0004                          ; take high twelve bits
-        .done:  
-            mov     WORD [cluster], dx                  ; store new cluster
-            cmp     dx, 0x0FF0                          ; test for end of file
-            jb      load_image
-done:
-    jmp 0x0050:0x0000
+    ; read image file into memory
+    mov ax, es
+    mov gs, ax
+    mov ax, STAGE2_SEGMENT_BASE                          ; destination for image
+    mov es, ax
+    mov bx, STAGE2_SEGMENT_OFFSET                          ; destination for image
+    call load_file
+    jmp STAGE2_SEGMENT_BASE:STAGE2_SEGMENT_OFFSET
         
 failure:
     mov si, fail

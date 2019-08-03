@@ -144,6 +144,64 @@ load_file_info:
      .end:     
           ret
 
+;************************************************;
+; Load FAT data
+; ES:BX  address of loaded data in memory
+;************************************************;
+load_fat:
+     xor     ax, ax
+     mov     al, byte [bpbNumberOfFATs]          ; number of FATs
+     mul     word [bpbSectorsPerFAT]             ; sectors used by FATs
+     mov     cx, ax
+
+     ; compute location of FAT and store in "ax"
+     mov     ax, word [bpbReservedSectors]       ; adjust for bootsector
+
+     call    read_sectors
+     ret
+
+;************************************************;
+; Load File data
+; ES:BX  address of loaded data in memory
+; GS segment of FAT info where from the cluster info is readed 
+;************************************************;
+load_file:
+     push bx
+
+     .load_image:
+          mov     ax, word [cluster]                  ; cluster to read
+          pop     bx                                  ; buffer to read into
+          call    chs_to_lba                          ; convert cluster to LBA
+          xor     cx, cx
+          mov     cl, byte [bpbSectorsPerCluster]     ; sectors to read
+          call    read_sectors
+          push    bx
+
+          ; compute next cluster
+          mov     ax, word [cluster]                  ; identify current cluster
+          mov     cx, ax                              ; copy current cluster
+          mov     dx, ax                              ; copy current cluster
+          shr     dx, 0x0001                          ; divide by two
+          add     cx, dx                              ; sum for (3/2)
+          mov     bx, 0x0200                          ; location of FAT in memory
+          add     bx, cx                              ; index into FAT
+          mov     dx, word [gs:bx]                    ; read two bytes from FAT
+          test    ax, 0x0001
+          jnz .odd_cluster
+          .even_cluster:
+               and     dx, 0000111111111111b               ; take low twelve bits
+               jmp     .done
+          .odd_cluster:
+               shr     dx, 0x0004                          ; take high twelve bits
+          .done:  
+               mov     WORD [cluster], dx                  ; store new cluster
+               cmp     dx, 0x0FF0                          ; test for end of file
+               jb      .load_image
+
+     pop bx
+     ret
+
+
 absoluteSector db 0x00
 absoluteHead   db 0x00
 absoluteTrack  db 0x00
