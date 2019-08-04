@@ -11,15 +11,15 @@
     bits 16
     org 0x7c00
 
+    jmp start
+    %include 'fat12.asm'
+    %include 'stdlib16.asm'
+
     %define ROOT_DIR_OFFSET 0x0200
     %define FAT_INFO_OFFSET 0x0200
 
     %define STAGE2_SEGMENT_BASE 0x0050
-    %define STAGE2_SEGMENT_OFFSET 0x0000
-
-    jmp start
-    %include 'fat12.asm'
-    %include 'stdlib16.asm' 
+    %define STAGE2_SEGMENT_OFFSET 0x0000 
 
 start:
     mov si, header
@@ -69,7 +69,7 @@ failure:
 data:
     fail db 'Failed', 0
     header db 'Welcome from Boot loader of stage 1', 0
-    stage2_name db 'KERNEL  SYS'
+    stage2_name db 'STAGE2  BIN'
 
     times 510 - ($-$$) db 0
     dw 0xAA55

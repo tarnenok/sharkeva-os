@@ -1,3 +1,4 @@
 floppy.img
-boot/kernel.sys
+kernel/kernel.sys
 boot/stage1.bin
+boot/stage2.bin

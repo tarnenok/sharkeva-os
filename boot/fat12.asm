@@ -166,6 +166,8 @@ load_fat:
 ; GS segment of FAT info where from the cluster info is readed 
 ;************************************************;
 load_file:
+     xor ecx, ecx
+     push ecx
      push bx
 
      .load_image:
@@ -175,6 +177,11 @@ load_file:
           xor     cx, cx
           mov     cl, byte [bpbSectorsPerCluster]     ; sectors to read
           call    read_sectors
+
+          pop	ecx
+          inc	ecx
+          push	ecx
+
           push    bx
 
           ; compute next cluster
@@ -199,6 +206,7 @@ load_file:
                jb      .load_image
 
      pop bx
+     pop ecx
      ret
 
 
@@ -208,3 +216,4 @@ absoluteTrack  db 0x00
 
 datasector  dw 0x0000
 cluster     dw 0x0000
+image_size db 0x0

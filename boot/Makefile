@@ -6,10 +6,10 @@ stage1: stage1.asm
 	nasm -w+all -f bin -o stage1.bin stage1.asm
 
 stage2: stage2.asm
-	nasm -w+all -f bin -o kernel.sys stage2.asm
+	nasm -w+all -f bin -o stage2.bin stage2.asm
 
 build: clean stage1 stage2
 
 clean:
-	rm -f kernel.sys
+	rm -f stage2.bin
 	rm -f stage1.bin
